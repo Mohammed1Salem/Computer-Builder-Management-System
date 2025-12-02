@@ -1,5 +1,6 @@
 package com.example.computerbuildermanagementsystem.Service;
 
+import com.example.computerbuildermanagementsystem.Api.ApiException;
 import com.example.computerbuildermanagementsystem.Model.Component;
 import com.example.computerbuildermanagementsystem.Model.PCBuild;
 import com.example.computerbuildermanagementsystem.Repository.ComponentRepository;
@@ -20,73 +21,73 @@ public class PCBuildService {
     private final EmployeeRepository employeeRepository;
 
     public List<PCBuild> get() {
-        return pcBuildRepository.findAll();
+        List<PCBuild> pcBuilds = pcBuildRepository.findAll();
+        if (pcBuilds.isEmpty()) throw new ApiException("No PCBuilds found");
+        return pcBuilds;
     }
 
-    public String add(Integer employeeId, PCBuild pcBuild) {
+    public void add(Integer employeeId, PCBuild pcBuild) {
         if (!employeeRepository.getEmployeeById(employeeId).getRole().equalsIgnoreCase("ASSEMBLER"))
-            return "Employee is not ASSEMBLER";
+            throw new ApiException("Employee is not ASSEMBLER");
 
         Component cpu = componentRepository.getComponentById(pcBuild.getCpuId());
-        if (cpu == null || !cpu.getType().equalsIgnoreCase("CPU")) return "CPU component not found";
+        if (cpu == null || !cpu.getType().equalsIgnoreCase("CPU")) throw new ApiException("CPU component not found");
 
         Component gpu = componentRepository.getComponentById(pcBuild.getGpuId());
-        if (gpu == null || !gpu.getType().equalsIgnoreCase("GPU")) return "GPU component not found";
+        if (gpu == null || !gpu.getType().equalsIgnoreCase("GPU")) throw new ApiException("GPU component not found");
 
         Component ram = componentRepository.getComponentById(pcBuild.getRamId());
-        if (ram == null || !ram.getType().equalsIgnoreCase("RAM")) return "RAM component not found";
+        if (ram == null || !ram.getType().equalsIgnoreCase("RAM")) throw new ApiException("RAM component not found");
 
         Component ssd = componentRepository.getComponentById(pcBuild.getSsdId());
-        if (ssd == null || !ssd.getType().equalsIgnoreCase("SSD")) return "SSD component not found";
+        if (ssd == null || !ssd.getType().equalsIgnoreCase("SSD")) throw new ApiException("SSD component not found");
 
         pcBuild.setCreatedAt(LocalDateTime.now());
         pcBuild.setPrice(ram.getPrice() + ssd.getPrice() + gpu.getPrice() + cpu.getPrice() + 300);
         pcBuildRepository.save(pcBuild);
-
-        return "PCBuild added successfully";
     }
 
-    public String update(Integer employeeId, Integer pcBuildId, PCBuild pcBuild) {
-
+    public void update(Integer employeeId, Integer pcBuildId, PCBuild pcBuild) {
         if (!employeeRepository.getEmployeeById(employeeId).getRole().equalsIgnoreCase("ASSEMBLER"))
-            return "Employee is not ASSEMBLER";
+            throw new ApiException("Employee is not ASSEMBLER");
 
         PCBuild old = pcBuildRepository.getPCBuildById(pcBuildId);
-        if (old == null) return "PCBuild not found";
+        if (old == null) throw new ApiException("PCBuild not found");
 
         Component cpu = componentRepository.getComponentById(pcBuild.getCpuId());
-        if (cpu == null || !cpu.getType().equalsIgnoreCase("CPU")) return "CPU component not found";
+        if (cpu == null || !cpu.getType().equalsIgnoreCase("CPU")) throw new ApiException("CPU component not found");
 
         Component gpu = componentRepository.getComponentById(pcBuild.getGpuId());
-        if (gpu == null || !gpu.getType().equalsIgnoreCase("GPU")) return "GPU component not found";
+        if (gpu == null || !gpu.getType().equalsIgnoreCase("GPU")) throw new ApiException("GPU component not found");
 
         Component ram = componentRepository.getComponentById(pcBuild.getRamId());
-        if (ram == null || !ram.getType().equalsIgnoreCase("RAM")) return "RAM component not found";
+        if (ram == null || !ram.getType().equalsIgnoreCase("RAM")) throw new ApiException("RAM component not found");
 
         Component ssd = componentRepository.getComponentById(pcBuild.getSsdId());
-        if (ssd == null || !ssd.getType().equalsIgnoreCase("SSD")) return "SSD component not found";
+        if (ssd == null || !ssd.getType().equalsIgnoreCase("SSD")) throw new ApiException("SSD component not found");
 
         old.setCpuId(pcBuild.getCpuId());
         old.setGpuId(pcBuild.getGpuId());
         old.setRamId(pcBuild.getRamId());
         old.setSsdId(pcBuild.getSsdId());
         old.setPrice(pcBuild.getPrice());
-        pcBuildRepository.save(old);
 
-        return "PCBuild updated successfully";
+        pcBuildRepository.save(old);
     }
 
-    public String delete(Integer employeeId, Integer pcBuildId) {
+    public void delete(Integer employeeId, Integer pcBuildId) {
         if (!employeeRepository.getEmployeeById(employeeId).getRole().equalsIgnoreCase("ASSEMBLER"))
-            return "Employee is not ASSEMBLER";
+            throw new ApiException("Employee is not ASSEMBLER");
 
         PCBuild old = pcBuildRepository.getPCBuildById(pcBuildId);
-        if (old == null) return "PCBuild not found";
+        if (old == null) throw new ApiException("PCBuild not found");
+
         pcBuildRepository.delete(old);
-        return "PCBuild delete successfully";
-    }
-    public PCBuild getPCBuildById(Integer id) {
-        return pcBuildRepository.getPCBuildById(id);
     }
 
+    public PCBuild getPCBuildById(Integer id) {
+        PCBuild pcBuild = pcBuildRepository.getPCBuildById(id);
+        if (pcBuild == null) throw new ApiException("PCBuild not found with id: " + id);
+        return pcBuild;
+    }
 }

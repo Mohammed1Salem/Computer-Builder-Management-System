@@ -1,5 +1,6 @@
 package com.example.computerbuildermanagementsystem.Service;
 
+import com.example.computerbuildermanagementsystem.Api.ApiException;
 import com.example.computerbuildermanagementsystem.Model.Component;
 import com.example.computerbuildermanagementsystem.Model.Employee;
 import com.example.computerbuildermanagementsystem.Repository.ComponentRepository;
@@ -17,31 +18,32 @@ public class ComponentService {
     private final EmployeeRepository employeeRepository;
 
     public List<Component> get() {
-        return componentRepository.findAll();
+        List<Component> components = componentRepository.findAll();
+        if (components.isEmpty()) throw new ApiException("No components found");
+        return components;
     }
 
-    public String add(Integer employeeId, Component component) {
+    public void add(Integer employeeId, Component component) {
         Employee employee = employeeRepository.getEmployeeById(employeeId);
-        if (employee == null) return "Employee not found";
+        if (employee == null) throw new ApiException("Employee not found");
 
         if (!employee.getRole().equalsIgnoreCase("ASSEMBLER") &&
                 !employee.getRole().equalsIgnoreCase("PC_SPECIALIST"))
-            return "Only ASSEMBLER or PC_SPECIALIST can add components";
+            throw new ApiException("Only ASSEMBLER or PC_SPECIALIST can add components");
 
         componentRepository.save(component);
-        return "Component added successfully";
     }
 
-    public String update(Integer employeeId, Integer componentId, Component component) {
+    public void update(Integer employeeId, Integer componentId, Component component) {
         Employee employee = employeeRepository.getEmployeeById(employeeId);
-        if (employee == null) return "Employee not found";
+        if (employee == null) throw new ApiException("Employee not found");
 
         if (!employee.getRole().equalsIgnoreCase("ASSEMBLER") &&
                 !employee.getRole().equalsIgnoreCase("PC_SPECIALIST"))
-            return "Only ASSEMBLER or PC_SPECIALIST can update components";
+            throw new ApiException("Only ASSEMBLER or PC_SPECIALIST can update components");
 
         Component old = componentRepository.getComponentById(componentId);
-        if (old == null) return "Component not found";
+        if (old == null) throw new ApiException("Component not found");
 
         old.setType(component.getType());
         old.setBrand(component.getBrand());
@@ -50,28 +52,37 @@ public class ComponentService {
         old.setQuantity(component.getQuantity());
 
         componentRepository.save(old);
-        return "Component updated successfully";
     }
 
-    public String delete(Integer employeeId, Integer componentId) {
+    public void delete(Integer employeeId, Integer componentId) {
         Employee employee = employeeRepository.getEmployeeById(employeeId);
-        if (employee == null) return "Employee not found";
+        if (employee == null) throw new ApiException("Employee not found");
 
         if (!employee.getRole().equalsIgnoreCase("ASSEMBLER") &&
                 !employee.getRole().equalsIgnoreCase("PC_SPECIALIST"))
-            return "Only ASSEMBLER or PC_SPECIALIST can delete components";
+            throw new ApiException("Only ASSEMBLER or PC_SPECIALIST can delete components");
 
         Component component = componentRepository.getComponentById(componentId);
-        if (component == null) return "Component not found";
+        if (component == null) throw new ApiException("Component not found");
 
         componentRepository.delete(component);
-        return "Component deleted successfully";
     }
+
     public Component getComponentById(Integer id) {
-        return componentRepository.getComponentById(id);
+        Component component = componentRepository.getComponentById(id);
+        if (component == null) throw new ApiException("Component not found");
+        return component;
     }
 
-    public List<Component> getByType(String type){return componentRepository.getByType(type); }
+    public List<Component> getByType(String type) {
+        List<Component> components = componentRepository.getByType(type);
+        if (components.isEmpty()) throw new ApiException("No components with type " + type + " found");
+        return components;
+    }
 
-    public List<Component> getByPriceLessThan(double price){ return componentRepository.getByPriceLessThan(price);}
+    public List<Component> getByPriceLessThan(double price) {
+        List<Component> components = componentRepository.getByPriceLessThan(price);
+        if (components.isEmpty()) throw new ApiException("No components found with price less than " + price);
+        return components;
+    }
 }

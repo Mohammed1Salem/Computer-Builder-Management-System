@@ -1,5 +1,6 @@
 package com.example.computerbuildermanagementsystem.Service;
 
+import com.example.computerbuildermanagementsystem.Api.ApiException;
 import com.example.computerbuildermanagementsystem.Model.Customer;
 import com.example.computerbuildermanagementsystem.Repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,9 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public List<Customer> get() {
-        return customerRepository.findAll();
+        List<Customer> customers = customerRepository.findAll();
+        if (customers.isEmpty()) throw new ApiException("No customers found");
+        return customers;
     }
 
     public void add(Customer customer) {
@@ -23,9 +26,9 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-    public boolean update(Integer id, Customer customer) {
+    public void update(Integer id, Customer customer) {
         Customer oldCustomer = customerRepository.getCustomerById(id);
-        if (oldCustomer == null) return false;
+        if (oldCustomer == null) throw new ApiException("Customer not found");
 
         oldCustomer.setName(customer.getName());
         oldCustomer.setEmail(customer.getEmail());
@@ -33,24 +36,27 @@ public class CustomerService {
         oldCustomer.setRegistrationDate(LocalDateTime.now());
 
         customerRepository.save(oldCustomer);
-        return true;
     }
 
-    public boolean delete(Integer id) {
+    public void delete(Integer id) {
         Customer oldCustomer = customerRepository.getCustomerById(id);
-        if (oldCustomer == null) return false;
+        if (oldCustomer == null) throw new ApiException("Customer not found");
 
         customerRepository.delete(oldCustomer);
-        return true;
     }
-    public Customer getCustomerById(Integer id){
-        return customerRepository.getCustomerById(id);
+
+    public Customer getCustomerById(Integer id) {
+        Customer customer = customerRepository.getCustomerById(id);
+        if (customer == null) throw new ApiException("Customer not found");
+        return customer;
     }
-    public boolean addFunds(Integer id, double amount) {
-        Customer old = customerRepository.getCustomerById(id);
-        if (old == null) return false;
-        old.setBalance(old.getBalance() + amount);
-        customerRepository.save(old);
-        return true;
+
+    public void addFunds(Integer id, double amount) {
+        if (amount <= 0) throw new ApiException("Amount must be greater than 0");
+        Customer customer = customerRepository.getCustomerById(id);
+        if (customer == null) throw new ApiException("Customer not found");
+
+        customer.setBalance(customer.getBalance() + amount);
+        customerRepository.save(customer);
     }
 }

@@ -18,49 +18,29 @@ public class PCBuildController {
 
     @GetMapping("/get")
     public ResponseEntity<?> get() {
-        return !pcBuildService.get().isEmpty()
-                ? ResponseEntity.status(200).body(pcBuildService.get())
-                : ResponseEntity.status(400).body(new ApiResponse("PCBuilds not found"));
+        return ResponseEntity.status(200).body(pcBuildService.get());
     }
 
     @PostMapping("/add/{employeeId}")
-    public ResponseEntity<?> add(@PathVariable Integer employeeId, @RequestBody @Valid PCBuild pcBuild, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
-        String response = pcBuildService.add(employeeId, pcBuild);
-
-        return response.contains("successfully")
-                ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+    public ResponseEntity<?> add(@PathVariable Integer employeeId, @RequestBody @Valid PCBuild pcBuild) {
+        pcBuildService.add(employeeId, pcBuild);
+        return ResponseEntity.status(200).body(new ApiResponse("PCBuild added successfully"));
     }
 
     @PutMapping("/update/{pcBuildId}/{employeeId}")
-    public ResponseEntity<?> update(@PathVariable Integer pcBuildId, @PathVariable Integer employeeId, @RequestBody @Valid PCBuild pcBuild, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
-        String response = pcBuildService.update(employeeId, pcBuildId, pcBuild);
-
-        return response.contains("successfully")
-                ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+    public ResponseEntity<?> update(@PathVariable Integer pcBuildId, @PathVariable Integer employeeId, @RequestBody @Valid PCBuild pcBuild) {
+        pcBuildService.update(employeeId, pcBuildId, pcBuild);
+        return ResponseEntity.status(200).body(new ApiResponse("PCBuild updated successfully"));
     }
 
     @DeleteMapping("/delete/{pcBuildId}/{employeeId}")
     public ResponseEntity<?> delete(@PathVariable Integer pcBuildId, @PathVariable Integer employeeId) {
-        String response = pcBuildService.delete(employeeId, pcBuildId);
-
-        return response.contains("successfully")
-                ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+        pcBuildService.delete(employeeId, pcBuildId);
+        return ResponseEntity.status(200).body(new ApiResponse("PCBuild deleted successfully"));
     }
 
     @GetMapping("/get-by-id/{id}")
     public ResponseEntity<?> getPCBuildById(@PathVariable Integer id) {
-        return pcBuildService.getPCBuildById(id) != null
-                ? ResponseEntity.status(200).body(pcBuildService.getPCBuildById(id))
-                : ResponseEntity.status(400).body(new ApiResponse("PCBuild not found with id: " + id));
+        return ResponseEntity.status(200).body(pcBuildService.getPCBuildById(id));
     }
-
 }

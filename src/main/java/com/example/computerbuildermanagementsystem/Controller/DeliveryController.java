@@ -3,10 +3,8 @@ package com.example.computerbuildermanagementsystem.Controller;
 import com.example.computerbuildermanagementsystem.Api.ApiResponse;
 import com.example.computerbuildermanagementsystem.Model.Delivery;
 import com.example.computerbuildermanagementsystem.Service.DeliveryService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,56 +18,41 @@ public class DeliveryController {
 
     @GetMapping("/get")
     public ResponseEntity<?> get() {
-        List<Delivery> deliveries = deliveryService.get();
-        return !deliveries.isEmpty() ? ResponseEntity.status(200).body(deliveries)
-                : ResponseEntity.status(400).body(new ApiResponse("Deliveries not found"));
+        return ResponseEntity.status(200).body(deliveryService.get());
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody @Valid Delivery delivery, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
-        String response = deliveryService.add(delivery);
-        return response.contains("successfully") ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+    public ResponseEntity<?> add(@RequestBody Delivery delivery) {
+        deliveryService.add(delivery);
+        return ResponseEntity.status(200).body(new ApiResponse("Delivery added"));
     }
 
     @PutMapping("/update/{deliveryId}/{employeeId}")
-    public ResponseEntity<?> update(@PathVariable Integer deliveryId, @PathVariable Integer employeeId, @RequestBody @Valid Delivery delivery, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
-        String response = deliveryService.update(deliveryId, employeeId, delivery);
-        return response.contains("successfully") ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+    public ResponseEntity<?> update(@PathVariable Integer deliveryId, @PathVariable Integer employeeId,
+                                    @RequestBody Delivery delivery) {
+        deliveryService.update(deliveryId, employeeId, delivery);
+        return ResponseEntity.status(200).body(new ApiResponse("Delivery updated"));
     }
 
     @DeleteMapping("/delete/{deliveryId}/{employeeId}")
     public ResponseEntity<?> delete(@PathVariable Integer deliveryId, @PathVariable Integer employeeId) {
-        String response = deliveryService.delete(deliveryId, employeeId);
-        return response.contains("successfully") ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+        deliveryService.delete(deliveryId, employeeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Delivery deleted"));
     }
 
     @GetMapping("/get-by-id/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
-        return deliveryService.getDeliveryById(id) != null ? ResponseEntity.status(200).body(deliveryService.getDeliveryById(id))
-                : ResponseEntity.status(400).body(new ApiResponse("Delivery not found"));
+        return ResponseEntity.status(200).body(deliveryService.getDeliveryById(id));
     }
 
     @GetMapping("/get-by-employee-id/{id}")
     public ResponseEntity<?> getByEmployeeId(@PathVariable Integer id) {
-        List<Delivery> deliveries = deliveryService.getDeliveriesByEmployeeId(id);
-        return !deliveries.isEmpty() ? ResponseEntity.status(200).body(deliveries)
-                : ResponseEntity.status(400).body(new ApiResponse("No deliveries found for employee: " + id));
+        return ResponseEntity.status(200).body(deliveryService.getDeliveriesByEmployeeId(id));
     }
 
     @PutMapping("/complete/{deliveryId}/{driverEmployeeId}")
     public ResponseEntity<?> complete(@PathVariable Integer deliveryId, @PathVariable Integer driverEmployeeId) {
-        String response = deliveryService.completeDelivery(deliveryId, driverEmployeeId);
-        return response.contains("successfully")
-                ? ResponseEntity.status(200).body(new ApiResponse(response))
-                : ResponseEntity.status(400).body(new ApiResponse(response));
+        deliveryService.completeDelivery(deliveryId, driverEmployeeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Delivery completed and order marked as DELIVERED"));
     }
 }

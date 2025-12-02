@@ -6,7 +6,6 @@ import com.example.computerbuildermanagementsystem.Service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,49 +17,35 @@ public class CustomerController {
 
     @GetMapping("/get")
     public ResponseEntity<?> get() {
-        return !customerService.get().isEmpty()
-                ? ResponseEntity.status(200).body(customerService.get())
-                : ResponseEntity.status(400).body(new ApiResponse("Customers not found"));
+        return ResponseEntity.status(200).body(customerService.get());
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody @Valid Customer customer, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity<?> add(@RequestBody @Valid Customer customer) {
         customerService.add(customer);
-        return ResponseEntity.status(200).body(new ApiResponse("Customer added successfully"));
+        return ResponseEntity.status(200).body(new ApiResponse("Customer added"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody @Valid Customer customer, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
-        return customerService.update(id, customer)
-                ? ResponseEntity.status(200).body(new ApiResponse("Customer updated successfully"))
-                : ResponseEntity.status(400).body(new ApiResponse("Customer not found"));
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody @Valid Customer customer) {
+        customerService.update(id, customer);
+        return ResponseEntity.status(200).body(new ApiResponse("Customer updated"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        return customerService.delete(id)
-                ? ResponseEntity.status(200).body(new ApiResponse("Customer deleted successfully"))
-                : ResponseEntity.status(400).body(new ApiResponse("Customer not found"));
+        customerService.delete(id);
+        return ResponseEntity.status(200).body(new ApiResponse("Customer deleted"));
     }
 
     @GetMapping("/get-by-id/{id}")
     public ResponseEntity<?> getCustomerById(@PathVariable Integer id) {
-        return customerService.getCustomerById(id) != null
-                ? ResponseEntity.status(200).body(customerService.getCustomerById(id))
-                : ResponseEntity.status(400).body(new ApiResponse("Customer not found with id: " + id));
+        return ResponseEntity.status(200).body(customerService.getCustomerById(id));
     }
 
-    @PutMapping("add-funds/{id}/{funds}")
-    public ResponseEntity<?> put(@PathVariable Integer id, @PathVariable double funds) {
-        return customerService.addFunds(id,funds)
-                ? ResponseEntity.status(200).body("Funds("+funds+") added to user with id: "+id)
-                : ResponseEntity.status(400).body(new ApiResponse("Customer not found with id: " + id));
+    @PutMapping("/add-funds/{id}/{funds}")
+    public ResponseEntity<?> addFunds(@PathVariable Integer id, @PathVariable double funds) {
+        customerService.addFunds(id, funds);
+        return ResponseEntity.status(200).body(new ApiResponse("Funds(" + funds + ") added to customer with id: " + id));
     }
-
 }
